@@ -47,7 +47,12 @@ jobs:
       - name: Merge PR
         if: success() && steps.bandit_scan.outcome == 'success'
         run: echo "Successful"
-
+        
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+          
       - name: Fetch Vulnerabilities
         id: fetch_vulnerabilities
         if: ${{ always() }}
