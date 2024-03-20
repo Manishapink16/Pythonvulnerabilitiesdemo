@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Debug - Before Script Execution
+        run: echo "Debug - Before Script Execution"
+
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -45,3 +48,6 @@ jobs:
       - name: Merge PR
         if: success() && steps.bandit_scan.outcome == 'success'
         run: echo "Successful"
+        
+      - name: Debug - After Script Execution
+        run: echo "Debug - After Script Execution"
