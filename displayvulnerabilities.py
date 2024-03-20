@@ -1,65 +1,47 @@
-import os
 import requests
 from bs4 import BeautifulSoup
-import subprocess
 import json
 
-# Function to perform Bandit scan and parse results
-def run_bandit_scan():
-    result = subprocess.run(['bandit', '-r', '.'], capture_output=True, text=True)
-    return result.stdout
+def fetch_code_scanning_alerts(owner, repo, token):
+    headers = {
+        'Authorization': f'token {token}',
+        'Accept': 'application/vnd.github.v3+json'
+    }
+    url = f'https://api.github.com/repos/{owner}/{repo}/code-scanning/alerts'
+    response = requests.get(url, headers=headers)
+    return response.json()
 
-# Function to fetch code scanning alerts from GitHub
-def fetch_code_scanning_alerts(repo_owner, repo_name, severity):
-    github_token = os.getenv('SGITHUB_TOKEN')
-    headers = {'Authorization': f'token {github_token}'}
-    url = f'https://api.github.com/repos/{repo_owner}/{repo_name}/code-scanning/alerts'
-    params = {'state': 'open', 'severity': severity}
-    response = requests.get(url, headers=headers, params=params)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Failed to fetch code scanning alerts: {response.status_code}")
-        return []
-
-# Function to fetch 'Likelihood of exploitability' from CWE website
-def fetch_likelihood_of_exploitability(cwe_id):
-    url = f"https://cwe.mitre.org/data/definitions/{cwe_id}.html"
+def get_likelihood_of_exploitability(cwe_id):
+    url = f'https://cwe.mitre.org/data/definitions/{cwe_id}.html'
     response = requests.get(url)
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
-        # Assuming the 'Likelihood of exploitability' is present in a specific div
-        likelihood_div = soup.find('div', {'id': 'applicable_platforms'})
-        if likelihood_div:
-            likelihood = likelihood_div.find_next('div').text.strip()
-            return likelihood
+        likelihood_element = soup.find('span', id='div_Likelihood_of_Exploit')
+        if likelihood_element:
+            return likelihood_element.text.strip()
     return None
 
-# Main function
 def main():
-    # Perform Bandit scan and parse results
-    bandit_results = run_bandit_scan()
+    owner = 'YourOwner'  # Replace with your GitHub repository owner
+    repo = 'YourRepo'  # Replace with your GitHub repository name
+    token = 'YourToken'  # Replace with your GitHub personal access token
 
-    # Fetch code scanning alerts from GitHub
-    code_scanning_alerts = fetch_code_scanning_alerts(repo_owner='Manishapink16', repo_name='Pythonvulnerabilitiesdemo', severity='high')
-
-    # Extract vulnerability details
+    alerts = fetch_code_scanning_alerts(owner, repo, token)
     vulnerabilities = []
-    for alert in code_scanning_alerts:
-        vulnerability = {
-            'rule_id': alert['rule_id'],
-            'file': alert['file'],
-            'line': alert['line'],
-            'message': alert['message'],
-            'likelihood_of_exploitability': fetch_likelihood_of_exploitability(alert['rule_id'])
-        }
-        vulnerabilities.append(vulnerability)
 
-    # Print list of vulnerabilities with severity High or above AND 'Likelihood of exploitability' High or above
-    print("Vulnerabilities with severity High or above AND Likelihood of exploitability High or above:")
-    for vulnerability in vulnerabilities:
-        if vulnerability['likelihood_of_exploitability'] == 'High':
-            print(vulnerability)
+    for alert in alerts:
+        if alert['rule']['severity'] in ('HIGH', 'CRITICAL'):
+            cwe_id = alert['rule']['description'].split(':')[0].strip()
+            likelihood = get_likelihood_of_exploitability(cwe_id)
+            if likelihood and likelihood in ('High', 'Very High'):
+                vulnerabilities.append({
+                    'CWE ID': cwe_id,
+                    'Severity': alert['rule']['severity'],
+                    'Likelihood of Exploitability': likelihood
+                })
+
+    with open('vulnerabilities.json', 'w') as f:
+        json.dump(vulnerabilities, f, indent=4)
 
 if __name__ == "__main__":
     main()
