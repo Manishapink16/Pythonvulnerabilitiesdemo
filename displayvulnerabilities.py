@@ -40,6 +40,12 @@ def main():
                     'Likelihood of Exploitability': likelihood
                 })
 
+    # Print vulnerabilities in a readable format
+    print("Vulnerabilities with Severity High or above and Likelihood of Exploitability High or above:")
+    for vulnerability in vulnerabilities:
+        print(vulnerability)
+
+    # Save vulnerabilities to a JSON file
     with open('vulnerabilities.json', 'w') as f:
         json.dump(vulnerabilities, f, indent=4)
 
