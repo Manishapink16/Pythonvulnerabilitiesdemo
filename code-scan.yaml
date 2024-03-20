@@ -45,3 +45,15 @@ jobs:
       - name: Merge PR
         if: steps.bandit.outputs.critical == 'Total issues discovered: 0'
         run: echo "Successful"
+
+      - name: Save Bandit scan results as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: bandit_results
+          path: bandit_results.txt
+
+      - name: Save fetched vulnerabilities as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: fetched_vulnerabilities
+          path: vulnerabilities.json
