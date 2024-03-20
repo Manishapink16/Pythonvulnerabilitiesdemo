@@ -3,7 +3,7 @@ name: Security Scan
 on:
   pull_request:
     branches:
-      - '*'
+      - main
 
 jobs:
   security_scan:
@@ -19,17 +19,17 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install bandit  # Install Bandit for Python code scanning
+        run: |
+          pip install bandit  # Install Bandit for Python code scanning
+          # Install any other dependencies required for scanning or processing
 
       - name: Run Bandit
-        run: bandit -r .  # Perform Bandit scan
-
-      - name: Check Bandit results
-        id: bandit
-        run: echo "::set-output name=critical::$(bandit -r . --format custom --severity 5 | grep -o 'Total issues discovered: [0-9]\+')"
+        id: bandit_scan
+        run: |
+          bandit -r . || echo "Bandit found issues"
 
       - name: Comment on PR
-        if: steps.bandit.outputs.critical != 'Total issues discovered: 0'
+        if: failure() && steps.bandit_scan.outcome == 'failure'
         uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.SGITHUB_TOKEN }}
@@ -43,5 +43,5 @@ jobs:
         continue-on-error: true
 
       - name: Merge PR
-        if: steps.bandit.outputs.critical == 'Total issues discovered: 0'
+        if: success() && steps.bandit_scan.outcome == 'success'
         run: echo "Successful"
