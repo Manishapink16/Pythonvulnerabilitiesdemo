@@ -52,5 +52,5 @@ jobs:
         id: fetch_vulnerabilities
         if: ${{ always() }}
         run: |
-          python displayvuln.py  # Run the Python script to fetch vulnerabilities
+          python displayvulnerabilitiesplease.py  # Run the Python script to fetch vulnerabilities
         continue-on-error: true
