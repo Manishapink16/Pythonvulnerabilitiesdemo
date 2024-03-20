@@ -32,7 +32,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: bandit_results
-          path: bandit_results.txt
+          path: Pythonvulnerabilitiesdemo/displayvulnerabilities.py/bandit_results.txt
 
       - name: Save fetched vulnerabilities as artifact
         uses: actions/upload-artifact@v2
