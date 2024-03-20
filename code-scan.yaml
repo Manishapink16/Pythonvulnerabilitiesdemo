@@ -27,6 +27,18 @@ jobs:
       - name: Check Bandit results
         id: bandit
         run: echo "::set-output name=critical::$(bandit -r . --format custom --severity 5 | grep -o 'Total issues discovered: [0-9]\+')"
+      
+      - name: Save Bandit scan results as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: bandit_results
+          path: bandit_results.txt
+
+      - name: Save fetched vulnerabilities as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: fetched_vulnerabilities
+          path: vulnerabilities.json
 
       - name: Comment on PR
         if: steps.bandit.outputs.critical != 'Total issues discovered: 0'
@@ -46,14 +58,3 @@ jobs:
         if: steps.bandit.outputs.critical == 'Total issues discovered: 0'
         run: echo "Successful"
 
-      - name: Save Bandit scan results as artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: bandit_results
-          path: bandit_results.txt
-
-      - name: Save fetched vulnerabilities as artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: fetched_vulnerabilities
-          path: vulnerabilities.json
