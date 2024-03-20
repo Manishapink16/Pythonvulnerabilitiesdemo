@@ -34,7 +34,7 @@ jobs:
         if: failure() && steps.bandit_scan.outcome == 'failure'
         uses: actions/github-script@v4
         with:
-          github-token: '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'
+          github-token: ${{ secrets.SGITHUB_TOKEN }}
           
           script: |
             github.issues.createComment({
