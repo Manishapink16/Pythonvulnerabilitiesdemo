@@ -20,7 +20,22 @@ jobs:
 
       - name: Install dependencies
         run: pip install bandit
+        
+      - uses: actions/checkout@v2
 
+      - name: Security check - Bandit
+        uses: ioggstream/bandit-report-artifacts@v0.0.2
+        with:
+         project_path: .
+         ignore_failure: true
+
+    # This is optional
+      - name: Security check report artifacts
+        uses: actions/upload-artifact@v1
+        with:
+         name: Security report
+         path: output/security_report.txt
+      
       - name: Run Bandit
         run: bandit -r .
 
@@ -28,11 +43,6 @@ jobs:
         id: bandit
         run: echo "::set-output name=critical::$(bandit -r . --format custom --severity 5 | grep -o 'Total issues discovered: [0-9]\+')"
       
-      - name: Save Bandit scan results as artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: bandit_results
-          path: Pythonvulnerabilitiesdemo/displayvulnerabilities.py/bandit_results.txt
 
       - name: Save fetched vulnerabilities as artifact
         uses: actions/upload-artifact@v2
