@@ -1,0 +1,49 @@
+name: Security Scan 
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+ 
+jobs:
+  security_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install bandit  # Install Bandit for Python code scanning
+          # Install any other dependencies required for scanning or processing
+
+      - name: Run Bandit
+        id: bandit_scan
+        run: |
+          bandit -r . || echo "Bandit found issues"
+
+      - name: Comment on PR
+        if: failure() && steps.bandit_scan.outcome == 'failure'
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.SGITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Block'
+            })
+        continue-on-error: true
+
+      - name: Merge PR
+        if: success() && steps.bandit_scan.outcome == 'success'
+        run: echo "Successful"
