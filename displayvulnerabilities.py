@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import json
-
+print("start")
 def fetch_code_scanning_alerts(owner, repo, token):
     headers = {
         'Authorization': f'token {token}',
@@ -22,9 +22,9 @@ def get_likelihood_of_exploitability(cwe_id):
     return None
 
 def main():
-    owner = 'YourOwner'  # Replace with your GitHub repository owner
-    repo = 'YourRepo'  # Replace with your GitHub repository name
-    token = 'YourToken'  # Replace with your GitHub personal access token
+    owner = 'Manishapink16'  # Replace with your GitHub repository owner
+    repo = 'Pythonvulnerabilitiesdemo'  # Replace with your GitHub repository name
+    token = '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'  # Replace with your GitHub personal access token
 
     alerts = fetch_code_scanning_alerts(owner, repo, token)
     vulnerabilities = []
