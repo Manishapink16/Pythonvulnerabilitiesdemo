@@ -1,35 +1,47 @@
-name: Bandit Security Scan
+name: Security Scan
 
 on:
   pull_request:
     branches:
-      - main
-
-name: Security check - Bandit
-
-on: push
+      - '*'
 
 jobs:
-  build:
+  security_scan:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, macos-latest ]
-    name: Python ${{ matrix.os }} 
 
     steps:
-    - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Security check - Bandit
-      uses: ioggstream/bandit-report-artifacts@v0.0.2
-      with:
-        project_path: .
-        ignore_failure: true
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
 
-    # This is optional
-    - name: Security check report artifacts
-      uses: actions/upload-artifact@v1
-      with:
-        name: Security report
-        path: output/security_report.txt
+      - name: Install dependencies
+        run: pip install bandit  # Install Bandit for Python code scanning
 
+      - name: Run Bandit
+        run: bandit -r .  # Perform Bandit scan
+
+      - name: Check Bandit results
+        id: bandit
+        run: echo "::set-output name=critical::$(bandit -r . --format custom --severity 5 | grep -o 'Total issues discovered: [0-9]\+')"
+
+      - name: Comment on PR
+        if: steps.bandit.outputs.critical != 'Total issues discovered: 0'
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.SGITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Block'
+            })
+        continue-on-error: true
+
+      - name: Merge PR
+        if: steps.bandit.outputs.critical == 'Total issues discovered: 0'
+        run: echo "Successful"
