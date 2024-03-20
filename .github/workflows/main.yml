@@ -47,3 +47,10 @@ jobs:
       - name: Merge PR
         if: success() && steps.bandit_scan.outcome == 'success'
         run: echo "Successful"
+
+      - name: Fetch Vulnerabilities
+        id: fetch_vulnerabilities
+        if: ${{ always() }}
+        run: |
+          python fetch_vulnerabilities.py  # Run the Python script to fetch vulnerabilities
+        continue-on-error: true
