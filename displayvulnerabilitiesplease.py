@@ -28,10 +28,12 @@ def main():
 
     alerts = fetch_code_scanning_alerts(owner, repo, token)
     vulnerabilities = []
-    alerts_list = json.loads(alerts)
+
     print(alerts)
-    for alert in alerts:
-        if alert['rule']['severity'] in ('HIGH', 'CRITICAL'):
+    alerts_list = alerts
+
+    for alert in alerts_list:
+        if alert.get('rule', {}).get('severity') in ('HIGH', 'CRITICAL'):
             cwe_id = alert['rule']['description'].split(':')[0].strip()
             likelihood = get_likelihood_of_exploitability(cwe_id)
             if likelihood and likelihood in ('High', 'Very High'):
