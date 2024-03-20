@@ -1,0 +1,47 @@
+name: Security Scan
+
+on:
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  security_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install bandit
+
+      - name: Run Bandit
+        run: bandit -r .
+
+      - name: Check Bandit results
+        id: bandit
+        run: echo "::set-output name=critical::$(bandit -r . --format custom --severity 5 | grep -o 'Total issues discovered: [0-9]\+')"
+
+      - name: Comment on PR
+        if: steps.bandit.outputs.critical != 'Total issues discovered: 0'
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Block'
+            })
+        continue-on-error: true
+
+      - name: Merge PR
+        if: steps.bandit.outputs.critical == 'Total issues discovered: 0'
+        run: echo "Successful"
