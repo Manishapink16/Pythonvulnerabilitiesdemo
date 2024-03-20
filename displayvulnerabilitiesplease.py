@@ -28,7 +28,8 @@ def main():
 
     alerts = fetch_code_scanning_alerts(owner, repo, token)
     vulnerabilities = []
-
+    alerts_list = json.loads(alerts)
+    print(alerts)
     for alert in alerts:
         if alert['rule']['severity'] in ('HIGH', 'CRITICAL'):
             cwe_id = alert['rule']['description'].split(':')[0].strip()
