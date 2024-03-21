@@ -7,7 +7,7 @@ def fetch_code_scanning_alerts(owner, repo, token):
         'Authorization': f'token {token}',
         'Accept': 'application/vnd.github.v3+json'
     }
-    url = f'https://api.github.com/repos/{owner}/{repo}/security_scan/alerts'
+    url = f'https://api.github.com/repos/{owner}/{repo}/code-scanning/alerts'
     response = requests.get(url, headers=headers)
     response.raise_for_status()
     return response.json()
