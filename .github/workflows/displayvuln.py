@@ -25,7 +25,7 @@ def get_likelihood_of_exploitability(cwe_id):
 def main():
     owner = 'YourOwner'  # Replace with your GitHub repository owner
     repo = 'YourRepo'  # Replace with your GitHub repository name
-    token = os.getenv('MINE_GITHUB_TOKEN')  # Retrieve GitHub token from environment variable
+    token = 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 #os.getenv('MINE_GITHUB_TOKEN')  # Retrieve GitHub token from environment variable
 
     try:
         alerts = fetch_code_scanning_alerts(owner, repo, token)
