@@ -6,7 +6,6 @@ on:
     branches:
       - main
 
- 
 jobs:
   security_scan:
     runs-on: ubuntu-latest
@@ -35,7 +34,6 @@ jobs:
         uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.MAN_GITHUB_TOKEN }}
-          
           script: |
             github.issues.createComment({
               issue_number: context.issue.number,
@@ -59,4 +57,10 @@ jobs:
         if: ${{ always() }}
         run: |
           python .github/workflows/displayvuln.py  # Run the Python script to fetch vulnerabilities
+        continue-on-error: true
+
+      - name: Check for Critical/High Vulnerabilities and Block PR
+        if: always() && steps.bandit_scan.outcome == 'success'
+        run: |
+          python .github/workflows/displayvuln.py  # Run the Python script to check for vulnerabilities and block the PR if necessary
         continue-on-error: true
