@@ -1,4 +1,3 @@
-
 import os
 import requests
 from bs4 import BeautifulSoup
@@ -45,8 +44,8 @@ def comment_on_pull_request(owner, repo, pr_number, comment, token):
     response.raise_for_status()
 
 def main():
-    owner = 'YourOwner'  # Replace with your GitHub repository owner
-    repo = 'YourRepo'  # Replace with your GitHub repository name
+    owner = 'Manishapink16'  # Replace with your GitHub repository owner
+    repo = 'Pythonvulnerabilitiesdemo'  # Replace with your GitHub repository name
     token = os.getenv('MAN_GITHUB_TOKEN')  # Retrieve GitHub token from environment variable
 
     try:
@@ -71,3 +70,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
